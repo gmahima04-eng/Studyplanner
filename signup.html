@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sign Up - StudyPlan</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .auth-container { max-width: 520px; margin: 60px auto; padding: 24px; }
+    .auth-container input { width: 100%; padding: 10px; margin: 8px 0; }
+    .auth-container button { padding: 10px 16px; }
+    .error { color: #b91c1c; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <main class="container auth-container">
+    <h1>Create account</h1>
+    <form id="signupForm">
+      <label>
+        Full name
+        <input type="text" id="name" required />
+      </label>
+      <label>
+        Email
+        <input type="email" id="email" required />
+      </label>
+      <label>
+        Password
+        <input type="password" id="password" required minlength="6" />
+      </label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="submit">Sign up</button>
+        <a href="login.html">Already have an account?</a>
+      </div>
+      <div id="msg" class="error" role="alert"></div>
+    </form>
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost/studyplan_app/api/";
+    const form = document.getElementById('signupForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch(API_BASE + 'register.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          msg.textContent = data.error || 'Registration failed';
+          return;
+        }
+
+        // Success - redirect to dashboard
+        window.location.href = 'index.html';
+      } catch (err) {
+        console.error(err);
+        msg.textContent = 'Network error';
+      }
+    });
+  </script>
+</body>
+</html>

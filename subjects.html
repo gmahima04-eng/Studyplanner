@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Subjects - StudyPlan</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">StudyPlan</div>
+  <nav class="nav">
+    <a href="index.html">Dashboard</a>
+    <a class="active" href="subjects.html">Subjects</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="calendar.html">Calendar</a>
+  </nav>
+</header>
+
+<main class="container">
+  <h1>Your Subjects</h1>
+
+  <!-- ADD SUBJECT BUTTON -->
+  <button class="btn" onclick="createSubject()">Add Subject</button>
+
+  <div id="subjectsGrid" class="grid"></div>
+</main>
+
+<!-- FIXED JS PATH -->
+<script src="js/app.js?v=1"></script>
+</body>
+</html>

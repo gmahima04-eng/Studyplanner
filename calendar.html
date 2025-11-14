@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calendar - StudyPlan</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .calendar-container { max-width: 800px; margin: 30px auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #f3f4f6; }
+    form.add-task { margin: 20px 0; display: flex; gap: 10px; flex-wrap: wrap; }
+    form.add-task input, form.add-task select, form.add-task button {
+      padding: 8px; border: 1px solid #ccc; border-radius: 6px;
+    }
+    form.add-task button { background: #2563eb; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">StudyPlan</div>
+  <nav class="nav">
+    <a href="index.html">Dashboard</a>
+    <a href="subjects.html">Subjects</a>
+    <a href="tasks.html">Tasks</a>
+    <a class="active" href="calendar.html">Calendar</a>
+  </nav>
+</header>
+
+<main class="container calendar-container">
+  <h1>Study Calendar</h1>
+
+  <h3>Add Upcoming Task</h3>
+  <form class="add-task" id="calendarTaskForm">
+    <input type="text" id="taskTitle" placeholder="Task Title" required />
+    <input type="date" id="taskDate" required />
+    <select id="taskPriority">
+      <option value="low">Low</option>
+      <option value="medium" selected>Medium</option>
+      <option value="high">High</option>
+    </select>
+    <button type="submit">Add Task</button>
+  </form>
+
+  <h3>Upcoming Tasks</h3>
+  <div id="calendarContainer"></div>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>

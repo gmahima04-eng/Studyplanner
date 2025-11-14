@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>StudyPlan - Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<!-- ✅ Added class="dashboard" -->
+<body class="dashboard">
+ <header class="topbar">
+  <div class="brand">StudyPlan</div>
+
+  <nav class="nav center-nav">
+    <a href="index.html" class="active">Dashboard</a>
+    <a href="subjects.html">Subjects</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="calendar.html">Calendar</a>
+  </nav>
+
+  <div class="actions">
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+
+  <main class="container">
+    <!-- Hero / Stats Section -->
+    <section class="hero">
+      <h1>Welcome back! <span></span></h1>
+      <p>Here's your study progress for this week</p>
+      <div class="stats">
+        <div class="card stat">
+          <div class="num" id="studyHours">45h</div>
+          <div class="label">Study Hours</div>
+        </div>
+        <div class="card stat">
+          <div class="num" id="activeSubjects">4</div>
+          <div class="label">Active Subjects</div>
+        </div>
+        <div class="card stat">
+          <div class="num" id="goalsCompleted">8/12</div>
+          <div class="label">Goals Completed</div>
+        </div>
+        <div class="card stat">
+          <div class="num" id="streak">15 days</div>
+          <div class="label">Streak</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subjects Section -->
+    <section class="subjects">
+      <div class="section-header">
+        <h2>Your Subjects</h2>
+        <div>
+          <button id="addSubject">Add Subject</button>
+          <button id="sortSub">Sort</button>
+        </div>
+      </div>
+      <div id="subjectsGrid" class="grid"></div>
+    </section>
+
+    <!-- ✅ Updated Upcoming Tasks Section -->
+    <section class="tasks">
+      <h2>Upcoming Tasks</h2>
+      <div id="dashboardTasks"></div>
+    </section>
+  </main>
+<!-- Modal for Add/Edit Subject -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="modalTitle">Add Subject</h3>
+    <form id="modalForm">
+      <input type="hidden" name="id" />
+      <label>Title <input name="title" required /></label>
+      <label>Color <input name="color" type="color" value="#60a5fa" /></label>
+      <label>Planned Hours <input name="planned_hours" type="number" value="5" /></label>
+      <label>Completed % <input name="completed_percent" type="number" min="0" max="100" value="0" /></label>
+      <div class="modal-actions">
+        <button type="submit">Save</button>
+        <button type="button" id="cancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <!-- Link JS -->
+  <script src="js/app.js"></script>
+</body>
+</html>

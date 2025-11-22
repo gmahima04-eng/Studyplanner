@@ -29,7 +29,7 @@ switch ($method) {
         $conn->query("INSERT INTO $table ($columns) VALUES ($values)");
         echo json_encode(["success" => $conn->insert_id > 0]);
         break;
-
+// code for insert the subject
     case 'PUT':
         $id = $_GET['id'] ?? null;
         $data = json_decode(file_get_contents("php://input"), true);
@@ -42,7 +42,7 @@ switch ($method) {
         $conn->query("UPDATE $table SET " . implode(",", $set) . " WHERE id=$id");
         echo json_encode(["success" => true]);
         break;
-
+// to delete the subject here
     case 'DELETE':
         $id = $_GET['id'] ?? null;
         if (!$id) { echo json_encode(["error" => "No ID provided"]); exit; }

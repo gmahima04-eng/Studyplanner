@@ -32,38 +32,39 @@
     </form>
   </main>
 
-  <script>
-    const API_BASE = "http://localhost/studyplan_app/api/";
-    const form = document.getElementById('loginForm');
-    const msg = document.getElementById('msg');
+<script>
+const form = document.getElementById('loginForm');
+const msg = document.getElementById('msg');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      msg.textContent = '';
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.textContent = "";
 
-      try {
-        const res = await fetch(API_BASE + 'auth.php', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-        const data = await res.json();
-        if (!res.ok) {
-          msg.textContent = data.error || 'Login failed';
-          return;
-        }
-
-        // Success: redirect to dashboard
-        window.location.href = 'index.html';
-      } catch (err) {
-        console.error(err);
-        msg.textContent = 'Network error';
-      }
+  try {
+    const res = await fetch("http://localhost/studyplan_app/api/login.php", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
     });
-  </script>
+
+    const data = await res.json();
+
+    if (!data.success) {
+      msg.textContent = data.message || "Login failed";
+      return;
+    }
+
+    window.location.href = "index.html";
+
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Network error";
+  }
+});
+</script>
 </body>
 </html>

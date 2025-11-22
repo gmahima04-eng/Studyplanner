@@ -1,14 +1,12 @@
 <?php
-session_start();  // IMPORTANT: must be FIRST line
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db = "studyplan_db";
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "studyplan_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($host, $user, $pass, $db);
 
 if ($conn->connect_error) {
-    die("DB Connection failed: " . $conn->connect_error);
+    die("DB connection failed: " . $conn->connect_error);
 }
 ?>

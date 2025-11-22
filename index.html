@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
-<!-- ✅ Added class="dashboard" -->
 <body class="dashboard">
- <header class="topbar">
+
+<header class="topbar">
   <div class="brand">StudyPlan</div>
 
   <nav class="nav center-nav">
@@ -20,54 +20,54 @@
   </nav>
 
   <div class="actions">
+    <!-- Logout button -->
     <button id="logoutBtn">Logout</button>
   </div>
 </header>
 
 
-  <main class="container">
-    <!-- Hero / Stats Section -->
-    <section class="hero">
-      <h1>Welcome back! <span></span></h1>
-      <p>Here's your study progress for this week</p>
-      <div class="stats">
-        <div class="card stat">
-          <div class="num" id="studyHours">45h</div>
-          <div class="label">Study Hours</div>
-        </div>
-        <div class="card stat">
-          <div class="num" id="activeSubjects">4</div>
-          <div class="label">Active Subjects</div>
-        </div>
-        <div class="card stat">
-          <div class="num" id="goalsCompleted">8/12</div>
-          <div class="label">Goals Completed</div>
-        </div>
-        <div class="card stat">
-          <div class="num" id="streak">15 days</div>
-          <div class="label">Streak</div>
-        </div>
-      </div>
-    </section>
+<main class="container">
+  <section class="hero">
+    <h1>Welcome back! <span></span></h1>
+    <p>Here's your study progress for this week</p>
 
-    <!-- Subjects Section -->
-    <section class="subjects">
-      <div class="section-header">
-        <h2>Your Subjects</h2>
-        <div>
-          <button id="addSubject">Add Subject</button>
-          <button id="sortSub">Sort</button>
-        </div>
+    <div class="stats">
+      <div class="card stat">
+        <div class="num" id="studyHours">45h</div>
+        <div class="label">Study Hours</div>
       </div>
-      <div id="subjectsGrid" class="grid"></div>
-    </section>
+      <div class="card stat">
+        <div class="num" id="activeSubjects">4</div>
+        <div class="label">Active Subjects</div>
+      </div>
+      <div class="card stat">
+        <div class="num" id="goalsCompleted">8/12</div>
+        <div class="label">Goals Completed</div>
+      </div>
+      <div class="card stat">
+        <div class="num" id="streak">15 days</div>
+        <div class="label">Streak</div>
+      </div>
+    </div>
+  </section>
 
-    <!-- ✅ Updated Upcoming Tasks Section -->
-    <section class="tasks">
-      <h2>Upcoming Tasks</h2>
-      <div id="dashboardTasks"></div>
-    </section>
-  </main>
+  <section class="subjects">
+    <div class="section-header">
+      <h2>Your Subjects</h2>
+      <div>
+        <button id="addSubject">Add Subject</button>
+        <button id="sortSub">Sort</button>
+      </div>
+    </div>
+    <div id="subjectsGrid" class="grid"></div>
+  </section>
+
+  <section class="tasks">
+    <h2>Upcoming Tasks</h2>
+    <div id="dashboardTasks"></div>
+  </section>
+</main>
+
 <!-- Modal for Add/Edit Subject -->
 <div id="modal" class="modal hidden">
   <div class="modal-content">
@@ -78,6 +78,7 @@
       <label>Color <input name="color" type="color" value="#60a5fa" /></label>
       <label>Planned Hours <input name="planned_hours" type="number" value="5" /></label>
       <label>Completed % <input name="completed_percent" type="number" min="0" max="100" value="0" /></label>
+
       <div class="modal-actions">
         <button type="submit">Save</button>
         <button type="button" id="cancelBtn">Cancel</button>
@@ -87,7 +88,77 @@
 </div>
 
 
-  <!-- Link JS -->
-  <script src="js/app.js"></script>
+<!-- Main JS App -->
+<script src="js/app.js"></script>
+
+<!-- Authentication Protection + Logout + Subject Modal -->
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  // 🔐 protect page
+  if (typeof checkAuth === "function") {
+    await checkAuth(); 
+  }
+
+  // 🔐 logout button
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    if (typeof logout === "function") {
+      logout();
+    }
+  });
+
+  // 📚 Load subjects and tasks on dashboard
+  if (document.getElementById("subjectsGrid")) {
+    await loadSubjects();
+  }
+  if (document.getElementById("dashboardTasks")) {
+    await loadDashboardTasks();
+    if (typeof loadDashboardStats === 'function') await loadDashboardStats();
+  }
+
+  // ➕ Add Subject button - open modal
+  document.getElementById("addSubject")?.addEventListener("click", () => {
+    const modal = document.getElementById("modal");
+    const form = document.getElementById("modalForm");
+    document.getElementById("modalTitle").textContent = "Add Subject";
+    form.reset();
+    form.querySelector('input[name="id"]').value = "";
+    modal.classList.remove("hidden");
+  });
+
+  // ❌ Cancel button - close modal
+  document.getElementById("cancelBtn")?.addEventListener("click", () => {
+    document.getElementById("modal").classList.add("hidden");
+  });
+
+  // 💾 Modal form submission
+  document.getElementById("modalForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const id = form.querySelector('input[name="id"]').value;
+    const title = form.querySelector('input[name="title"]').value;
+    const color = form.querySelector('input[name="color"]').value;
+    const planned_hours = parseInt(form.querySelector('input[name="planned_hours"]').value) || 0;
+    const completed_percent = parseInt(form.querySelector('input[name="completed_percent"]').value) || 0;
+
+    const subject = { title, color, planned_hours, completed_percent };
+    if (id) subject.id = parseInt(id);
+
+    const success = await addOrUpdateSubject(subject);
+    if (success) {
+      document.getElementById("modal").classList.add("hidden");
+      form.reset();
+    }
+  });
+
+  // Close modal when clicking outside
+  document.getElementById("modal")?.addEventListener("click", (e) => {
+    if (e.target.id === "modal") {
+      document.getElementById("modal").classList.add("hidden");
+    }
+  });
+});
+</script>
+
 </body>
 </html>

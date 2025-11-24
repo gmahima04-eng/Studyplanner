@@ -11,9 +11,9 @@ switch ($method) {
   // ---------- GET: Fetch all tasks ----------
   case 'GET':
     $res = $conn->query("SELECT t.*, s.title AS subject_name 
-                         FROM tasks t 
-                         LEFT JOIN subjects s ON t.subject_id = s.id 
-                         ORDER BY t.due_date ASC");
+          FROM tasks t 
+          LEFT JOIN subjects s ON t.subject_id = s.id 
+          ORDER BY t.due_date ASC");
     $tasks = [];
     while ($row = $res->fetch_assoc()) $tasks[] = $row;
     echo json_encode($tasks);

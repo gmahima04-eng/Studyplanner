@@ -1,18 +1,30 @@
 <?php
-// subjects.php - improved error messages for debugging
-header("Access-Control-Allow-Origin: *");
+// subjects.php - CRUD operations with proper session handling
+session_start();
+header("Access-Control-Allow-Origin: http://localhost");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
 
 include "db.php";
 
+// Verify user is logged in
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        $sql = "SELECT * FROM subjects ORDER BY id DESC";
-        $result = $conn->query($sql);
+        $stmt = $conn->prepare("SELECT * FROM subjects WHERE user_id = ? ORDER BY id DESC");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
         if (!$result) { http_response_code(500); echo json_encode(['error'=>$conn->error]); exit; }
         $subjects = [];
         while ($row = $result->fetch_assoc()) $subjects[] = $row;
@@ -22,25 +34,25 @@ switch ($method) {
     case 'POST':
         $data = json_decode(file_get_contents("php://input"), true);
         if (!$data || empty($data['title'])) { http_response_code(400); echo json_encode(['error'=>'Title required']); exit; }
-        $title = $conn->real_escape_string($data['title']);
-        $color = $conn->real_escape_string($data['color'] ?? '#60a5fa');
+        $title = $data['title'];
+        $color = $data['color'] ?? '#60a5fa';
         $planned_hours = (int)($data['planned_hours'] ?? 0);
         $completed_percent = (int)($data['completed_percent'] ?? 0);
-        // In a proper system use session user id
-        $user_id = 1;
 
         if (!empty($data['id'])) {
             $id = (int)$data['id'];
-            $query = "UPDATE subjects SET title='$title', color='$color', planned_hours=$planned_hours, completed_percent=$completed_percent WHERE id=$id";
-            if ($conn->query($query)) {
+            $stmt = $conn->prepare("UPDATE subjects SET title=?, color=?, planned_hours=?, completed_percent=? WHERE id=? AND user_id=?");
+            $stmt->bind_param("ssiiii", $title, $color, $planned_hours, $completed_percent, $id, $user_id);
+            if ($stmt->execute()) {
                 echo json_encode(['success'=> true, 'id'=> $id]);
             } else {
                 http_response_code(500);
                 echo json_encode(['error'=>$conn->error]);
             }
         } else {
-            $query = "INSERT INTO subjects (user_id, title, color, planned_hours, completed_percent) VALUES ($user_id, '$title', '$color', $planned_hours, $completed_percent)";
-            if ($conn->query($query)) {
+            $stmt = $conn->prepare("INSERT INTO subjects (user_id, title, color, planned_hours, completed_percent) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("issii", $user_id, $title, $color, $planned_hours, $completed_percent);
+            if ($stmt->execute()) {
                 echo json_encode(['success'=>true, 'id'=>$conn->insert_id]);
             } else {
                 http_response_code(500);
@@ -52,7 +64,14 @@ switch ($method) {
     case 'DELETE':
         $id = $_GET['id'] ?? 0;
         if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
-        if ($conn->query("DELETE FROM subjects WHERE id=".(int)$id)) echo json_encode(['success'=>true]); else { http_response_code(500); echo json_encode(['error'=>$conn->error]); }
+        $stmt = $conn->prepare("DELETE FROM subjects WHERE id=? AND user_id=?");
+        $stmt->bind_param("ii", $id, $user_id);
+        if ($stmt->execute()) {
+            echo json_encode(['success'=>true]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error'=>$conn->error]);
+        }
         break;
 
     default:

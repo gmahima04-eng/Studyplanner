@@ -1,21 +1,19 @@
 <?php
-// api/me.php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+session_start();
+header("Access-Control-Allow-Origin: http://localhost");
+header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
 
-session_start();
-
-if (!empty($_SESSION['user_id'])) {
-  echo json_encode([
-    "loggedIn" => true,
-    "user" => [
-      "id" => (int)$_SESSION['user_id'],
-      "name" => $_SESSION['user_name'] ?? null
-    ]
-  ]);
-} else {
-  echo json_encode(["loggedIn" => false]);
+if (!isset($_SESSION["user_id"])) {
+    echo json_encode(["success" => false, "loggedIn" => false]);
+    exit();
 }
+
+echo json_encode([
+    "success" => true,
+    "loggedIn" => true,
+    "user_id" => $_SESSION["user_id"],
+    "email" => $_SESSION["user_email"] ?? null,
+    "name" => $_SESSION["user_name"] ?? null
+]);
 ?>

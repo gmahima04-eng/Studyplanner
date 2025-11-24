@@ -16,18 +16,97 @@
     <a href="tasks.html">Tasks</a>
     <a href="calendar.html">Calendar</a>
   </nav>
+  <div class="actions">
+    <button id="logoutBtn">Logout</button>
+  </div>
 </header>
 
 <main class="container">
   <h1>Your Subjects</h1>
 
   <!-- ADD SUBJECT BUTTON -->
-  <button class="btn" onclick="createSubject()">Add Subject</button>
+  <button class="btn" id="addSubjectBtn">Add Subject</button>
 
   <div id="subjectsGrid" class="grid"></div>
 </main>
 
+<!-- Modal for Add/Edit Subject -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="modalTitle">Add Subject</h3>
+    <form id="modalForm">
+      <input type="hidden" name="id" />
+      <label>Title <input name="title" required /></label>
+      <label>Color <input name="color" type="color" value="#60a5fa" /></label>
+      <label>Planned Hours <input name="planned_hours" type="number" value="5" /></label>
+      <label>Completed % <input name="completed_percent" type="number" min="0" max="100" value="0" /></label>
+
+      <div class="modal-actions">
+        <button type="submit">Save</button>
+        <button type="button" id="cancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- FIXED JS PATH -->
 <script src="js/app.js?v=1"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  // Auth check
+  await checkAuth();
+
+  // Logout button
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    logout();
+  });
+
+  // Add Subject button
+  document.getElementById("addSubjectBtn").addEventListener("click", () => {
+    const modal = document.getElementById("modal");
+    const form = document.getElementById("modalForm");
+    document.getElementById("modalTitle").textContent = "Add Subject";
+    form.reset();
+    form.querySelector('input[name="id"]').value = "";
+    modal.classList.remove("hidden");
+  });
+
+  // Cancel button
+  document.getElementById("cancelBtn").addEventListener("click", () => {
+    document.getElementById("modal").classList.add("hidden");
+  });
+
+  // Modal form submission
+  document.getElementById("modalForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const id = form.querySelector('input[name="id"]').value;
+    const title = form.querySelector('input[name="title"]').value;
+    const color = form.querySelector('input[name="color"]').value;
+    const planned_hours = parseInt(form.querySelector('input[name="planned_hours"]').value) || 0;
+    const completed_percent = parseInt(form.querySelector('input[name="completed_percent"]').value) || 0;
+
+    const subject = { title, color, planned_hours, completed_percent };
+    if (id) subject.id = parseInt(id);
+
+    const success = await addOrUpdateSubject(subject);
+    if (success) {
+      document.getElementById("modal").classList.add("hidden");
+      form.reset();
+    }
+  });
+
+  // Close modal when clicking outside
+  document.getElementById("modal").addEventListener("click", (e) => {
+    if (e.target.id === "modal") {
+      document.getElementById("modal").classList.add("hidden");
+    }
+  });
+
+  // Load subjects
+  await loadSubjects();
+});
+</script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Subjects - StudyPlan</title>
+<title>Tasks - StudyPlan</title>
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -12,23 +12,161 @@
   <div class="brand">StudyPlan</div>
   <nav class="nav">
     <a href="index.html">Dashboard</a>
-    <a class="active" href="subjects.html">Subjects</a>
-    <a href="tasks.html">Tasks</a>
+    <a href="subjects.html">Subjects</a>
+    <a class="active" href="tasks.html">Tasks</a>
     <a href="calendar.html">Calendar</a>
   </nav>
+  <div class="actions">
+    <button id="logoutBtn">Logout</button>
+  </div>
 </header>
 
 <main class="container">
-  <h1>Your Subjects</h1>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h1>Your Tasks</h1>
+    <button id="addTaskBtn" class="btn" style="background-color:#3b82f6;color:white;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;">+ Add Task</button>
+  </div>
 
-  <!-- ADD SUBJECT BUTTON -->
-  <button class="btn" onclick="createSubject()">Add Subject</button>
+  <!-- Modal for Add/Edit Task -->
+  <div id="taskModal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;">
+    <div class="modal-content" style="background:white;width:90%;max-width:500px;margin:50px auto;padding:20px;border-radius:8px;">
+      <h2 id="modalTitle">Add New Task</h2>
+      <form id="taskForm">
+        <input type="hidden" id="taskId">
+        <div class="form-group">
+          <label>Task Title *</label>
+          <input type="text" id="taskTitle" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;">
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" id="taskSubject" placeholder="Enter subject name (optional)" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;">
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="taskPriority" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="taskDueDate" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+          <button type="button" id="cancelTaskBtn" style="padding:10px 20px;border:1px solid #ddd;border-radius:4px;cursor:pointer;background:white;">Cancel</button>
+          <button type="submit" style="padding:10px 20px;background-color:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  <div id="subjectsGrid" class="grid"></div>
+  <div id="tasksList"></div>
 </main>
 
 <!-- FIXED JS PATH -->
 <script src="./js/app.js"></script>
+
+<script>
+let taskFormReady = false;
+
+// Initialize when DOM and app.js are ready
+document.addEventListener("DOMContentLoaded", async () => {
+  // Auth check
+  await checkAuth();
+
+  // Logout button
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    logout();
+  });
+
+  // Modal elements
+  const modal = document.getElementById("taskModal");
+  const addTaskBtn = document.getElementById("addTaskBtn");
+  const cancelTaskBtn = document.getElementById("cancelTaskBtn");
+  const taskForm = document.getElementById("taskForm");
+
+  // Open modal
+  addTaskBtn.addEventListener("click", () => {
+    document.getElementById("taskTitle").value = "";
+    document.getElementById("taskSubject").value = "";
+    document.getElementById("taskPriority").value = "medium";
+    document.getElementById("taskDueDate").value = "";
+    modal.style.display = "block";
+  });
+
+  // Close modal
+  cancelTaskBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  // Close modal when clicking outside
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  });
+
+  // Handle form submission
+  taskForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const title = document.getElementById("taskTitle").value.trim();
+    
+    if (!title) {
+      alert("Please enter a task title");
+      return;
+    }
+
+    const taskData = {
+      title: title,
+      priority: document.getElementById("taskPriority").value,
+      due_date: document.getElementById("taskDueDate").value || null,
+      subject_id: null
+    };
+
+    try {
+      const res = await fetch("http://localhost/studyplan_app/api/calendar.php", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(taskData)
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      
+      if (data.success) {
+        alert("✅ Task added successfully!");
+        
+        // Clear form
+        taskForm.reset();
+        modal.style.display = "none";
+        
+        // Reload tasks
+        if (typeof loadTasks === 'function') {
+          await loadTasks();
+        }
+        if (typeof loadDashboardTasks === 'function') {
+          await loadDashboardTasks();
+        }
+      } else {
+        alert("❌ Error: " + (data.error || "Failed to add task"));
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("❌ Error: " + err.message);
+    }
+  });
+
+  // Load tasks
+  if (typeof loadTasks === 'function') {
+    await loadTasks();
+  }
+});
+</script>
 
 </body>
 </html>

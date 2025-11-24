@@ -37,7 +37,9 @@
   </main>
 
   <script>
-    const API_BASE = "http://localhost/studyplan_app/api/";
+    // Match login change: use relative base for local same-origin setup
+    const API_BASE = "";
+
     const form = document.getElementById('signupForm');
     const msg = document.getElementById('msg');
 
@@ -49,23 +51,30 @@
       const password = document.getElementById('password').value;
 
       try {
-        const res = await fetch(API_BASE + 'register.php', {
+        const res = await fetch(API_BASE + 'signup.php', {
           method: 'POST',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password })
         });
 
-        const data = await res.json();
+        const text = await res.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (parseErr) {
+          console.error('Non-JSON response from signup.php:', text);
+          msg.textContent = 'Server error (check console)';
+          return;
+        }
+
         if (!res.ok) {
-          msg.textContent = data.error || 'Registration failed';
+          msg.textContent = (data && (data.error || data.message)) || `Registration failed (${res.status})`;
           return;
         }
 
         // Success - redirect to dashboard
         window.location.href = 'index.html';
       } catch (err) {
-        console.error(err);
+        console.error('Fetch failed:', err);
         msg.textContent = 'Network error';
       }
     });
